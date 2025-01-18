@@ -32,7 +32,7 @@ import GeolocationPopup from "./components/GeolocationPopup.jsx"; // New Compone
 const allowedArea = {
   latitude: 26.8718,  
   longitude: 75.7758,
-  radius: 50, 
+  radius: 5000, 
 };
 
 const App = () => {

@@ -18,7 +18,7 @@ function GeolocationPopup() {
     >
       <h1 style={{ fontSize: '2rem', marginBottom: '20px' }}>Access Restricted</h1>
       <p style={{ fontSize: '1.2rem', marginBottom: '20px' }}>
-        You are currently outside the allowed area. Please move within the specified area to use Work Sync.
+      Yor location is of or You are currently outside the allowed area. Please move within the specified area to use Work Sync.
       </p>
       <button
         onClick={() => window.location.reload()}
