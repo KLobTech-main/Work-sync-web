@@ -48,7 +48,7 @@ const Meetings = () => {
   const apiBaseUrl =
     "https://work-sync-gbf0h9d5amcxhwcr.canadacentral-01.azurewebsites.net/api/meetings";
   const usersApiUrl =
-    "https://work-sync-gbf0h9d5amcxhwcr.canadacentral-01.azurewebsites.net/api/users/get-all-users";
+    `https://work-sync-gbf0h9d5amcxhwcr.canadacentral-01.azurewebsites.net/api/users/get-all-users-name-email?email=${email} `;
 
   const fetchMeetings = async () => {
     if (!email || !token) {

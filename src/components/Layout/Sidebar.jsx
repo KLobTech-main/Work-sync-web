@@ -104,6 +104,14 @@ const Sidebar = () => {
                 <ListItemText primary="Leave Request" sx={{ color: '#E0F2F1' }} />
               </ListItem>
             </NavLink>
+            <NavLink to="/leave/leave-request-cancel" className="nav-link">
+              <ListItem button sx={{ pl: 4 }}>
+                <ListItemIcon>
+                  <BulletIcon sx={{ color: '#1E3A8A', fontSize: 8 }} />
+                </ListItemIcon>
+                <ListItemText primary="Leave Request Cancel" sx={{ color: '#E0F2F1' }} />
+              </ListItem>
+            </NavLink>
             <NavLink to="/leave/holidays" className="nav-link">
               <ListItem button sx={{ pl: 4 }}>
                 <ListItemIcon>

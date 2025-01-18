@@ -33,6 +33,7 @@ function Documents() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false); 
+
   const email = localStorage.getItem('email');
   const token = localStorage.getItem('jwtToken');
 
@@ -82,6 +83,25 @@ function Documents() {
       setError('Failed to upload document. Please try again.');
     } finally {
       setUploading(false);
+    }
+  };
+
+  const downloadFile = async (url, fileName) => {
+    try {
+      const response = await axios.get(url, {
+        responseType: 'blob', // Ensure the response is treated as a binary file
+      });
+      const blob = new Blob([response.data]);
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName; // Set the download attribute to the desired file name
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href); // Clean up the blob URL
+    } catch (error) {
+      console.error('Error downloading the file:', error);
+      alert('Failed to download the file. Please try again.');
     }
   };
 
@@ -184,13 +204,13 @@ function Documents() {
                         <TableRow key={index}>
                           <TableCell>{doc.fileName}</TableCell>
                           <TableCell>
-                            <a
-                              href={doc.blobUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <Button
+                              onClick={() => downloadFile(doc.blobUrl, doc.fileName)}
+                              variant="outlined"
+                              size="small"
                             >
                               Download
-                            </a>
+                            </Button>
                           </TableCell>
                           <TableCell>
                             <Button

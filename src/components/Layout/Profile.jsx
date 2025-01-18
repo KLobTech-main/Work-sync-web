@@ -59,6 +59,7 @@ function Profile() {
       <Paper
         elevation={3}
         sx={{
+          margin:"20px",
           padding: "20px",
           borderRadius: "10px",
           backgroundColor: "#fff",

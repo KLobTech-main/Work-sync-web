@@ -16,36 +16,92 @@ import {
   Select,
   InputLabel,
   FormControl,
+  IconButton,
+  Pagination,
+  Menu,
 } from "@mui/material";
-import { Add } from "@mui/icons-material";
+import { Add, MoreVert } from "@mui/icons-material";
 import axios from "axios";
 
 function LeaveRequest() {
   const [leaveData, setLeaveData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
+
+    const [page, setPage] = useState(1);
+    const totalPages = 10; // Define total pages here
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [openModal, setOpenModal] = useState(false);
+
   const [newLeave, setNewLeave] = useState({
     reason: "",
     leaveType: "",
     days: 0,
     startDate: "",
     endDate: "",
-    dayType: "Full Day", // Default to Full Day
+    dayType: "Full Day",
   });
   const [formError, setFormError] = useState("");
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedLeave, setSelectedLeave] = useState(null);
 
   const email = localStorage.getItem("email");
   const token = localStorage.getItem("jwtToken");
 
+  
   const leaveTypes = [
     "Sick Leave",
     "Annual Leave",
     "Casual Leave",
     "Optional Leave",
   ];
+
+  const downloadFile = async (url, fileName) => {
+    try {
+      const response = await axios.get(url, {
+        responseType: 'blob',
+      });
+      const blob = new Blob([response.data]);
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error('Error downloading the file:', error);
+      alert('Failed to download the file. Please try again.');
+    }
+  };
+
+  const handleClickMenu = (event, leave) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedLeave(leave);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+    setSelectedLeave(null);
+  };
+  const handlePageChange = (event, value) => {
+    setPage(value);
+    console.log("Current Page:", value);
+  };
+
+  const handleDownload = () => {
+    if (selectedLeave) {
+      downloadFile(selectedLeave.blobUrl, selectedLeave.fileName);
+      handleCloseMenu();
+    }
+  };
+
+  const handleView = () => {
+    if (selectedLeave) {
+      window.open(selectedLeave.blobUrl, '_blank');
+      handleCloseMenu();
+    }
+  };
 
   useEffect(() => {
     if (email && token) {
@@ -58,39 +114,20 @@ function LeaveRequest() {
         )
         .then((response) => {
           setLeaveData(response.data);
-          setFilteredData(response.data);
         })
         .catch((error) => console.error("Error fetching leave data:", error));
     }
   }, [email, token]);
 
-  useEffect(() => {
-    let filtered = leaveData;
-
-    if (filterType) {
-      filtered = filtered.filter((leave) => leave.leaveType === filterType);
-    }
-
-    if (filterStatus) {
-      filtered = filtered.filter((leave) =>
-        filterStatus === "Approved"
-          ? leave.approvedByAdmin
-          : !leave.approvedByAdmin
-      );
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter((leave) =>
-        leave.reason.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    setFilteredData(filtered);
-  }, [searchQuery, filterType, filterStatus, leaveData]);
-
   const handleModalOpen = () => setOpenModal(true);
+
   const handleModalClose = () => {
     setOpenModal(false);
+    resetForm();
+    setFormError("");
+  };
+
+  const resetForm = () => {
     setNewLeave({
       reason: "",
       leaveType: "",
@@ -99,7 +136,6 @@ function LeaveRequest() {
       endDate: "",
       dayType: "Full Day",
     });
-    setFormError("");
   };
 
   const handleInputChange = (event) => {
@@ -147,7 +183,7 @@ function LeaveRequest() {
     }
 
     const lastUpdatedMonth = `${currentDate.getFullYear()}-${String(
-      currentDate.getMonth()
+      currentDate.getMonth() + 1
     ).padStart(2, "0")}`;
 
     if (email && token) {
@@ -190,43 +226,6 @@ function LeaveRequest() {
         </Button>
       </Box>
 
-      <Box className="flex flex-wrap items-center gap-4 mb-6">
-        <TextField
-          label="Search by Reason"
-          variant="outlined"
-          size="small"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <FormControl variant="outlined" size="small" sx={{ width: "200px" }}>
-          <InputLabel>Filter by Leave Type</InputLabel>
-          <Select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            label="Filter by Leave Type"
-          >
-            <MenuItem value="">All</MenuItem>
-            {leaveTypes.map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl variant="outlined" size="small" sx={{ width: "200px" }}>
-          <InputLabel>Filter by Status</InputLabel>
-          <Select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            label="Filter by Status"
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="Approved">Approved</MenuItem>
-            <MenuItem value="Pending">Pending</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-
       <TableContainer component={Paper} className="mb-6">
         <Table>
           <TableHead>
@@ -237,29 +236,50 @@ function LeaveRequest() {
               <TableCell>End Date</TableCell>
               <TableCell>Days</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredData.length > 0 ? (
-              filteredData.map((leave, index) => (
+            {leaveData.length > 0 ? (
+              leaveData.map((leave, index) => (
                 <TableRow key={index}>
                   <TableCell>{leave.leaveType}</TableCell>
                   <TableCell>{leave.reason}</TableCell>
                   <TableCell>{leave.startDate}</TableCell>
                   <TableCell>{leave.endDate}</TableCell>
                   <TableCell>{leave.days}</TableCell>
+                  <TableCell>{leave.status}</TableCell>
+
+
                   <TableCell>
-                    {leave.status === "PENDING"
-                      ? "Pending"
-                      : leave.status === "REJECTED"
-                      ? "Rejected"
-                      : "Approved"}
+
+                    {leave.blobUrl ? (
+                      <>
+                        <IconButton onClick={(event) => handleClickMenu(event, leave)}>
+
+                          <MoreVert />
+                        </IconButton>
+                        <Menu
+                          anchorEl={anchorEl}
+                          open={Boolean(anchorEl)}
+                          onClose={handleCloseMenu}
+                        >
+                          <MenuItem onClick={handleDownload}>Download</MenuItem>
+                          <MenuItem onClick={handleView}>View</MenuItem>
+                        </Menu>
+                      </>
+                    ) : (
+                      <Typography variant="body2" color="textSecondary">
+                        No Attachment Available
+                      </Typography>
+                    )}
                   </TableCell>
                 </TableRow>
+
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell colSpan={7} align="center">
                   No leave requests found.
                 </TableCell>
               </TableRow>
@@ -344,6 +364,7 @@ function LeaveRequest() {
                 {formError}
               </Typography>
             )}
+
             <Button
               fullWidth
               variant="contained"
@@ -355,6 +376,16 @@ function LeaveRequest() {
           </form>
         </Box>
       </Modal>
+       <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
+            <Pagination
+              page={page} // Current page
+              onChange={handlePageChange} // Page change handler
+              siblingCount={0} // Removes numbers between arrows
+              boundaryCount={1} // Shows only the first and last page
+              shape="rounded" // Rounded arrows
+              color="primary" // Styling
+            />
+          </Box>
     </Box>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -54,7 +54,7 @@ function PaySlip() {
     const currentMonthName = monthNames[month];
     const filtered = data.filter(
       (item) =>
-        item.payrunPeriod.includes(currentMonthName) && item.year === year
+        item.payRunPeriod.includes(currentMonthName) && item.year === year
     );
     setFilteredData(filtered);
   };
@@ -140,7 +140,7 @@ function PaySlip() {
             />
           </div>
 
-          {loading ? (
+           {loading ? (
             <Box className="text-center">
               <CircularProgress />
               <Typography variant="body2" className="mt-2">
@@ -257,7 +257,7 @@ function PaySlip() {
                 </table>
               </Paper>
             </>
-          )}
+          )} 
         </Box>
       </div>
     </>

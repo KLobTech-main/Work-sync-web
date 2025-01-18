@@ -22,6 +22,7 @@ const DailyLog = () => {
   const [selectedFilter, setSelectedFilter] = useState('Today');
   const [error, setError] = useState(null);
 
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -42,7 +43,7 @@ const DailyLog = () => {
         }
 
         const data = await response.json();
-        setLogData(data.logs || []); 
+        setLogData(data || []); // Set response data or empty array if response is empty
       } catch (error) {
         setError(error.message);
       }
@@ -51,6 +52,7 @@ const DailyLog = () => {
     fetchData();
   }, []);
 
+  
   const handleFilterChange = (filter) => {
     setSelectedFilter(filter);
   };
@@ -59,13 +61,9 @@ const DailyLog = () => {
     setSearchQuery(event.target.value);
   };
 
-  const filteredData = logData.filter(
-    (log) =>
-      log.profile === loggedInUser &&
-      log.date === selectedDate.toISOString().split('T')[0] &&
-      log.profile.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredData = logData;
 
+  console.log('dsfbnfkjd',filteredData);
   return (
     <Box className="p-8 bg-gray-50 min-h-screen">
       <Grid container spacing={2} className="mb-6">
@@ -86,7 +84,7 @@ const DailyLog = () => {
         <Grid item xs={12} sm={4}>
           <TextField
             variant="outlined"
-            placeholder="Search"
+            placeholder="Search by Email"
             value={searchQuery}
             onChange={handleSearchChange}
             fullWidth
@@ -125,17 +123,14 @@ const DailyLog = () => {
           <TableHead>
             <TableRow>
               {[
-                'Profile',
+                'S.No',
                 'Date',
                 'Punch In',
-                'In GeoLocation',
                 'Punch Out',
-                'Out GeoLocation',
-                'Behavior',
-                'Type',
-                'Break Time',
+                
                 'Total Hours',
-                'Entry',
+                'Over Time',
+                'Late Time',
               ].map((heading) => (
                 <TableCell key={heading} className="font-bold text-gray-600">
                   {heading}
@@ -147,22 +142,25 @@ const DailyLog = () => {
             {filteredData.length > 0 ? (
               filteredData.map((log, index) => (
                 <TableRow key={index}>
-                  <TableCell>{log.profile}</TableCell>
+
+                  <TableCell>{index+1}</TableCell>
                   <TableCell>{log.date}</TableCell>
-                  <TableCell>{log.punchIn}</TableCell>
-                  <TableCell>{log.inGeoLocation}</TableCell>
-                  <TableCell>{log.punchOut}</TableCell>
-                  <TableCell>{log.outGeoLocation}</TableCell>
-                  <TableCell>{log.behavior}</TableCell>
-                  <TableCell>{log.type}</TableCell>
-                  <TableCell>{log.breakTime}</TableCell>
-                  <TableCell>{log.totalHours}</TableCell>
-                  <TableCell>{log.entry}</TableCell>
+                  <TableCell>
+                    {log.punchInTime ? new Date(log.punchInTime).toLocaleTimeString() : 'N/A'}
+                  </TableCell>
+                
+                  <TableCell>
+                    {log.overTime ? new Date(log.punchOutTime).toLocaleTimeString() : 'N/A'}
+                  </TableCell>
+                  
+                  <TableCell>{log.totalWorkingHours}</TableCell>
+                  <TableCell>{log.overTime}</TableCell>
+                  <TableCell>{log.lateTime}</TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={11} align="center">
+                <TableCell colSpan={7} align="center">
                   No logs found.
                 </TableCell>
               </TableRow>

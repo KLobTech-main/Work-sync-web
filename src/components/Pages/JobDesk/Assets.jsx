@@ -33,15 +33,15 @@ function Assets() {
       setError('');
       try {
         const response = await axios.get(
-          `https://work-sync-gbf0h9d5amcxhwcr.canadacentral-01.azurewebsites.net/api/assets/${email}`,
+          `https://work-sync-gbf0h9d5amcxhwcr.canadacentral-01.azurewebsites.net/api/assets/?email=${email}`,
           {
             headers: { Authorization: token },
-            params: { email },
+     
           }
         );
         setAssets(response.data); 
       } catch (err) {
-        setError('Failed to fetch assets. Please try again later.');
+        setError('Failed to fetch assets. Please try again later.',err);
       } finally {
         setLoading(false);
       }

@@ -1,12 +1,12 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import { useState } from 'react';
+import { useState, useEffect } from "react";
 import Sidebar from "./components/Layout/Sidebar";
 import Navbar from "./components/Layout/Navbar";
 import LoginForm from "./components/Forms/LoginForm";
 import Dashboard from "./components/Layout/Dashboard";
 import RegisterForm from "./components/Forms/RegisterForm";
 import JobDesk from "./components/Pages/JobDesk";
-import LeaveAllowance from './components/Pages/JobDesk/LeaveAllowance';
+import LeaveAllowance from "./components/Pages/JobDesk/LeaveAllowance";
 import Documents from "./components/Pages/JobDesk/Documents";
 import Assets from "./components/Pages/JobDesk/Assets";
 import SalaryOverview from "./components/Pages/JobDesk/SalaryOverview";
@@ -25,7 +25,16 @@ import JobHistory from "./components/Pages/JobDesk/JobHistory";
 import Meetings from "./components/Pages/Meetings";
 import Tickets from "./components/Pages/Tickets";
 import Task from "./components/Pages/Task";
-import PrivateRoute from "./components/PrivateRoute"; 
+import PrivateRoute from "./components/PrivateRoute";
+import LeaveRequestCancel from "./components/Pages/Leave/LeaveRequestCancel";
+import GeolocationPopup from "./components/GeolocationPopup.jsx"; // New Component
+
+const allowedArea = {
+  latitude: 26.8718,  
+  longitude: 75.7758,
+  radius: 50, 
+};
+
 const App = () => {
   return (
     <Router>
@@ -36,9 +45,60 @@ const App = () => {
 
 const Main = () => {
   const [darkMode, setDarkMode] = useState(false);
+  const [isWithinArea, setIsWithinArea] = useState(true);
   const location = useLocation();
 
   const isAuthRoute = location.pathname === "/login" || location.pathname === "/register";
+
+  useEffect(() => {
+    // Geolocation API to check user's position
+    const checkLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            const distance = calculateDistance(
+              latitude,
+              longitude,
+              allowedArea.latitude,
+              allowedArea.longitude
+            );
+            setIsWithinArea(distance <= allowedArea.radius);
+          },
+          (error) => {
+            console.error("Geolocation error:", error);
+            setIsWithinArea(false);
+          }
+        );
+      } else {
+        console.error("Geolocation is not supported by this browser.");
+        setIsWithinArea(false);
+      }
+    };
+
+    checkLocation();
+  }, []);
+
+  // Haversine formula to calculate the distance between two lat/lon points
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const toRadians = (degree) => (degree * Math.PI) / 180;
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = toRadians(lat1);
+    const φ2 = toRadians(lat2);
+    const Δφ = toRadians(lat2 - lat1);
+    const Δλ = toRadians(lon2 - lon1);
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in meters
+  };
+
+  if (!isWithinArea) {
+    return <GeolocationPopup />;
+  }
 
   return (
     <div>
@@ -177,6 +237,14 @@ const Main = () => {
               element={
                 <PrivateRoute>
                   <LeaveRequest />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/leave/leave-request-cancel"
+              element={
+                <PrivateRoute>
+                  <LeaveRequestCancel />
                 </PrivateRoute>
               }
             />

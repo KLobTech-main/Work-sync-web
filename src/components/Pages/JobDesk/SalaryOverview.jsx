@@ -3,7 +3,31 @@ import { Typography, Paper, Box } from "@mui/material";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import InnerSidbar from '../../Layout/InnerSidbar';
 import Profile from '../../Layout/Profile';
+import { useState, useEffect } from "react";
+import axios from "axios";
 function SalaryOverview() {
+  
+  const token = localStorage.getItem('jwtToken');
+  const email = localStorage.getItem('email');
+
+  const [salaryOverview, setSalaryOverview] = useState(null);
+
+  useEffect(() => {
+    const fetchSalaryOverview = async () => {
+      try {
+        const response = await axios.get(`https://work-sync-gbf0h9d5amcxhwcr.canadacentral-01.azurewebsites.net/api/users/get/user?email=${email}`, {
+          headers: {
+            Authorization: token,
+          }
+        });
+        setSalaryOverview(response.data.salaryOverview);
+      } catch (error) {
+        console.error("Error fetching salary overview:", error);
+      }
+    };
+
+    fetchSalaryOverview();
+  }, [email, token]);
   return (
     <>
 
@@ -32,7 +56,7 @@ function SalaryOverview() {
               variant="body2"
               className="mt-1 font-medium text-gray-500 bg-gray-50 rounded px-2 py-1"
             >
-              Not added yet
+              {salaryOverview !== null ? salaryOverview : "Not added yet"}
             </Typography>
           </div>
         </div>
