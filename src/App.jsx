@@ -1,162 +1,297 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
-import { Box } from '@mui/material';
-import Sidebar from './components/Sidebar'; 
-import EmployeeDetails from './pages/EmployeeDetail';
-import SubAdminDetails from './pages/SubAdminDetail';
-import Ticket from './pages/Ticket';
-import Task from './pages/Task';
-import Meeting from './pages/Meeting';
-import Login from './pages/Login';
-import LeavePage from './pages/EmployeeDetails/LeavePage';
-import Register from './pages/Register';
-import AttendancePage from './pages/EmployeeDetails/AttendancePage';
-import TaskPage from './pages/EmployeeDetails/TaskPage';
-import SubAdminAttendance from './pages/SubAdminDetails/SubAdminAttendance';
-import SubAdminLeave from './pages/SubAdminDetails/SubAdminLeave';
-import AnnouncementForm from './pages/AnnouncementForm';
-import LeaveRequest from './pages/LeaveRequest';
-import NotFound from './pages/NotFound'; 
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import Sidebar from "./components/Layout/Sidebar";
+import Navbar from "./components/Layout/Navbar";
+import LoginForm from "./components/Forms/LoginForm";
+import Dashboard from "./components/Layout/Dashboard";
+import RegisterForm from "./components/Forms/RegisterForm";
+import JobDesk from "./components/Pages/JobDesk";
+import LeaveAllowance from "./components/Pages/JobDesk/LeaveAllowance";
+import Documents from "./components/Pages/JobDesk/Documents";
+import Assets from "./components/Pages/JobDesk/Assets";
+import SalaryOverview from "./components/Pages/JobDesk/SalaryOverview";
+import PayrunAndBadge from "./components/Pages/JobDesk/PayrunAndBadge";
+import PaySlip from "./components/Pages/JobDesk/PaySlip";
+import BankDetail from "./components/Pages/JobDesk/BankDetail";
+import Address from "./components/Pages/JobDesk/Address";
+import Emergency from "./components/Pages/JobDesk/Emergency";
+import LeaveRequest from "./components/Pages/Leave/LeaveRequest";
+import LeaveSummary from "./components/Pages/Leave/LeaveSummary";
+import AttendanceDailyLog from "./components/Pages/Attendance/AttendanceDailyLog";
+import AttendanceRequest from "./components/Pages/Attendance/AttendanceRequest";
+import AttendanceSummary from "./components/Pages/Attendance/AttendanceSummary";
+import Holidays from "./components/Pages/Leave/Holidays";
+import JobHistory from "./components/Pages/JobDesk/JobHistory";
+import Meetings from "./components/Pages/Meetings";
+import Tickets from "./components/Pages/Tickets";
+import Task from "./components/Pages/Task";
+import PrivateRoute from "./components/PrivateRoute";
+import LeaveRequestCancel from "./components/Pages/Leave/LeaveRequestCancel";
+import GeolocationPopup from "./components/GeolocationPopup.jsx"; // New Component
 
-// PrivateRoute component for protecting routes
-const PrivateRoute = ({ children }) => {
-  const isAuthenticated = Boolean(localStorage.getItem('token')); // Use your authentication logic
-  return isAuthenticated ? children : <Navigate to="/admin/login" />;
+const allowedArea = {
+  latitude: 26.8718,  
+  longitude: 75.7758,
+  radius: 5000, 
 };
 
-// ErrorBoundary to catch runtime errors
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error('Error caught by ErrorBoundary:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <h1>Something went wrong.</h1>;
-    }
-    return this.props.children;
-  }
-}
-
-// Main AppContent component
-const AppContent = () => {
-  const location = useLocation();
-
-  // Paths where the sidebar should not be displayed
-  const noSidebarPaths = ['/admin/login', '/admin/register'];
-  const showSidebar = !noSidebarPaths.includes(location.pathname);
-
-  console.log('Rendering AppContent with path:', location.pathname);
-
-  return (
-    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      {/* Sidebar */}
-      {showSidebar && (
-        <Box
-          sx={{
-            width: '250px',
-            position: 'fixed',
-            height: '100vh',
-            backgroundColor: '#0D1B2A',
-            color: '#fff',
-          }}
-        >
-          <Sidebar />
-        </Box>
-      )}
-
-      {/* Main Content */}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          marginLeft: showSidebar ? '250px' : '0',
-          height: '100vh',
-          overflowY: 'auto',
-          backgroundColor: '#f5f5f5',
-          padding: 2,
-        }}
-      >
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/admin/login" element={<Login />} />
-          <Route path="/admin/register" element={<Register />} />
-
-          {/* Private Routes */}
-          <Route
-            path="/admin/employee-details"
-            element={<PrivateRoute><EmployeeDetails /></PrivateRoute>}
-          />
-          <Route
-            path="/admin/employee/:id/leave"
-            element={<PrivateRoute><LeavePage /></PrivateRoute>}
-          />
-          <Route
-            path="/admin/employee/:id/task"
-            element={<PrivateRoute><TaskPage /></PrivateRoute>}
-          />
-          <Route
-            path="/admin/employee/:id/attendance"
-            element={<PrivateRoute><AttendancePage /></PrivateRoute>}
-          />
-          <Route
-            path="/admin/subadmin-details"
-            element={<PrivateRoute><SubAdminDetails /></PrivateRoute>}
-          />
-          <Route
-            path="/subadmin/:id/leave"
-            element={<PrivateRoute><SubAdminLeave /></PrivateRoute>}
-          />
-          <Route
-            path="/subadmin/:email/attendance"
-            element={<PrivateRoute><SubAdminAttendance /></PrivateRoute>}
-          />
-          <Route
-            path="/admin/meetings"
-            element={<PrivateRoute><Meeting /></PrivateRoute>}
-          />
-          <Route
-            path="/admin/tasks"
-            element={<PrivateRoute><Task /></PrivateRoute>}
-          />
-          <Route
-            path="/admin/tickets"
-            element={<PrivateRoute><Ticket /></PrivateRoute>}
-          />
-          <Route
-            path="/admin/announcement"
-            element={<PrivateRoute><AnnouncementForm /></PrivateRoute>}
-          />
-          <Route
-            path="/admin/leave-request"
-            element={<PrivateRoute><LeaveRequest /></PrivateRoute>}
-          />
-
-          {/* 404 Route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Box>
-    </Box>
-  );
-};
-
-// Main App component
 const App = () => {
   return (
     <Router>
-      <ErrorBoundary>
-        <AppContent />
-      </ErrorBoundary>
+      <Main />
     </Router>
+  );
+};
+
+const Main = () => {
+  const [darkMode, setDarkMode] = useState(false);
+  const [isWithinArea, setIsWithinArea] = useState(true);
+  const location = useLocation();
+
+  const isAuthRoute = location.pathname === "/login" || location.pathname === "/register";
+
+  useEffect(() => {
+    // Geolocation API to check user's position
+    const checkLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            const distance = calculateDistance(
+              latitude,
+              longitude,
+              allowedArea.latitude,
+              allowedArea.longitude
+            );
+            setIsWithinArea(distance <= allowedArea.radius);
+          },
+          (error) => {
+            console.error("Geolocation error:", error);
+            setIsWithinArea(false);
+          }
+        );
+      } else {
+        console.error("Geolocation is not supported by this browser.");
+        setIsWithinArea(false);
+      }
+    };
+
+    checkLocation();
+  }, []);
+
+  // Haversine formula to calculate the distance between two lat/lon points
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const toRadians = (degree) => (degree * Math.PI) / 180;
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = toRadians(lat1);
+    const φ2 = toRadians(lat2);
+    const Δφ = toRadians(lat2 - lat1);
+    const Δλ = toRadians(lon2 - lon1);
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in meters
+  };
+
+  if (!isWithinArea) {
+    return <GeolocationPopup />;
+  }
+
+  return (
+    <div>
+      {!isAuthRoute && <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />}
+      <div style={{ display: "flex" }}>
+        {!isAuthRoute && <Sidebar />}
+        <div style={{ flexGrow: 1, padding: "-1px" }}>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<LoginForm />} />
+            <Route path="/register" element={<RegisterForm />} />
+
+            {/* Protected Routes */}
+            <Route
+              path="/"
+              element={
+                <PrivateRoute>
+                  <Dashboard darkMode={darkMode} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/jobdesk"
+              element={
+                <PrivateRoute>
+                  <JobDesk />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/meeting"
+              element={
+                <PrivateRoute>
+                  <Meetings darkMode={darkMode} />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/ticket"
+              element={
+                <PrivateRoute>
+                  <Tickets />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/task"
+              element={
+                <PrivateRoute>
+                  <Task />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/jobdesk/leave-allowance"
+              element={
+                <PrivateRoute>
+                  <LeaveAllowance />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/jobdesk/document"
+              element={
+                <PrivateRoute>
+                  <Documents />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/jobdesk/Assets"
+              element={
+                <PrivateRoute>
+                  <Assets />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/jobdesk/jobhistory"
+              element={
+                <PrivateRoute>
+                  <JobHistory />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/jobdesk/salary-overview"
+              element={
+                <PrivateRoute>
+                  <SalaryOverview />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/jobdesk/payrun-and-badge"
+              element={
+                <PrivateRoute>
+                  <PayrunAndBadge />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/jobdesk/payslip"
+              element={
+                <PrivateRoute>
+                  <PaySlip />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/jobdesk/bank-detail"
+              element={
+                <PrivateRoute>
+                  <BankDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/jobdesk/address"
+              element={
+                <PrivateRoute>
+                  <Address />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/jobdesk/Emergency"
+              element={
+                <PrivateRoute>
+                  <Emergency />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/leave/request"
+              element={
+                <PrivateRoute>
+                  <LeaveRequest />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/leave/leave-request-cancel"
+              element={
+                <PrivateRoute>
+                  <LeaveRequestCancel />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/leave/summary"
+              element={
+                <PrivateRoute>
+                  <LeaveSummary />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/leave/holidays"
+              element={
+                <PrivateRoute>
+                  <Holidays />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/attendance/daily-log"
+              element={
+                <PrivateRoute>
+                  <AttendanceDailyLog />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/attendance/request"
+              element={
+                <PrivateRoute>
+                  <AttendanceRequest />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/attendance/summary"
+              element={
+                <PrivateRoute>
+                  <AttendanceSummary />
+                </PrivateRoute>
+              }
+            />
+          </Routes>
+        </div>
+      </div>
+    </div>
   );
 };
 
