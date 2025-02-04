@@ -1,15 +1,18 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
-const PrivateRoute = ({ children }) => {
-  const location = useLocation();
-  const token = localStorage.getItem('jwtToken');
+/**
+ * PrivateRoute component to restrict access to authenticated users.
+ * @param {Object} props - Component props.
+ * @param {React.Component} props.element - The component to render if the user is authenticated.
+ * @returns {React.Component} - The element if authenticated, otherwise a redirect to login.
+ */
+const PrivateRoute = ({ element }) => {
+  const token = localStorage.getItem('token');
+  const email = localStorage.getItem('email');
 
-  if (!token) {
-    return <Navigate to="/login" state={{ from: location }} />;
-  }
-  
-  return children;
+  // If token or email is missing, redirect to login
+  return token && email ? element : <Navigate to="/admin/login" />;
 };
 
 export default PrivateRoute;
