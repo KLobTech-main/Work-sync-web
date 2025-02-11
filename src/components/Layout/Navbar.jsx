@@ -11,6 +11,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
 
   const token = localStorage.getItem('jwtToken');
   const email = localStorage.getItem('email');
+  
   const navigate = useNavigate(); // Hook to navigate to other pages
 
   useEffect(() => {
@@ -35,6 +36,12 @@ const Navbar = ({ darkMode, setDarkMode }) => {
         setLoading(false);
       });
   }, [email, token]);
+
+  useEffect(() => {
+    if (userData) {
+      localStorage.setItem('userData', JSON.stringify(userData));
+    }
+  }, [userData]);
 
   const toggleDarkMode = () => {
     setDarkMode((prevMode) => !prevMode);

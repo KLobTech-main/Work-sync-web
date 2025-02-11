@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import InnerSidbar from "../../Layout/InnerSidbar";
 import Profile from "../../Layout/Profile";
 import { Box, Typography, Divider } from "@mui/material";
@@ -7,6 +7,28 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 
 function PayrunAndBadge() {
+  const [salaryDetails, setSalaryDetails] = useState({
+    payRunPeriod: "",
+    houseRentAllowance: "",
+    conveyanceAllowance: "",
+    medicalAllowance: "",
+    specialAllowance: "",
+  });
+
+  useEffect(() => {
+    // Fetch user data from localStorage
+    const userData = localStorage.getItem("userData");
+
+    if (userData) {
+      try {
+        const parsedData = JSON.parse(userData);
+        setSalaryDetails(parsedData.salaryDetails || {});
+      } catch (error) {
+        console.error("Error parsing userData from localStorage:", error);
+      }
+    }
+  }, []);
+
   return (
     <>
       <Profile />
@@ -28,9 +50,8 @@ function PayrunAndBadge() {
                   Payrun Period
                 </Typography>
                 <Typography variant="body1" className="text-gray-600">
-                  Monthly
+                  {salaryDetails.payRunPeriod || "N/A"}
                   <br />
-                  Consider type - None
                 </Typography>
               </Box>
             </Box>
@@ -47,13 +68,25 @@ function PayrunAndBadge() {
                   Allowance
                 </Typography>
                 <Typography variant="body1" className="text-gray-600">
-                  House Rent Allowance - <span className="font-bold">38%</span>
+                  House Rent Allowance -{" "}
+                  <span className="font-bold">
+                    {salaryDetails.houseRentAllowance || "N/A"}
+                  </span>
                   <br />
-                  Conveyance Allowances - <span className="font-bold">6.4%</span>
+                  Conveyance Allowance -{" "}
+                  <span className="font-bold">
+                    {salaryDetails.conveyanceAllowance || "N/A"}
+                  </span>
                   <br />
-                  Medical Allowances - <span className="font-bold">5%</span>
+                  Medical Allowance -{" "}
+                  <span className="font-bold">
+                    {salaryDetails.medicalAllowance || "N/A"}
+                  </span>
                   <br />
-                  Special Allowances - <span className="font-bold">50.6%</span>
+                  Special Allowance -{" "}
+                  <span className="font-bold">
+                    {salaryDetails.specialAllowance || "N/A"}
+                  </span>
                 </Typography>
               </Box>
             </Box>

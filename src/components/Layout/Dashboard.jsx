@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Button, Chip } from "@mui/material";
 import axios from "axios";
-import TimeLog from "../Pages/Dasktop/TimeLog";
-import LeaveDesktop from "../Pages/Dasktop/LeaveDesktop";
+import TimeLog from "../Pages/Dashboard/TimeLog";
+import LeaveDesktop from "../Pages/Dashboard/LeaveDashboard";
 
 const formatTime = (date) => {
   let hours = date.getHours();
